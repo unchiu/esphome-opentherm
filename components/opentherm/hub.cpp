@@ -275,6 +275,7 @@ void OpenthermHub::dump_config() {
     ESP_LOGCONFIG(TAG, "OpenTherm:");
     ESP_LOGCONFIG(TAG, "  In: GPIO%d", this->in_pin);
     ESP_LOGCONFIG(TAG, "  Out: GPIO%d", this->out_pin);
+    ESP_LOGCONFIG(TAG, "  Sync mode: %d", this->sync_mode);
     ESP_LOGCONFIG(TAG, "  Sensors: %s", SHOW(OPENTHERM_SENSOR_LIST(ID, )));
     ESP_LOGCONFIG(TAG, "  Binary sensors: %s", SHOW(OPENTHERM_BINARY_SENSOR_LIST(ID, )));
     ESP_LOGCONFIG(TAG, "  Switches: %s", SHOW(OPENTHERM_SWITCH_LIST(ID, )));
