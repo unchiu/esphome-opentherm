@@ -1,5 +1,15 @@
 # OpenTherm Master for ESPHome
 
+## Fork description
+This is a fork of Arthur Rump's original OpenTherm component: https://github.com/arthurrump/esphome-opentherm. This fork was heavily modified and refactored:
+
+1. Ihor Melnik's OpenTherm library was replaced with a modified version of Jiří Praus' https://github.com/jpraus/arduino-opentherm library. In my opininion it's more robust and offers better debugging opportunities.
+2. Several outstanding pull requests from the original repository were integrated.
+3. The code was refactored according to current ESPHome codebase requirements.
+4. A pull request to include this component to ESPHome core was initiated: https://github.com/esphome/esphome/pull/6645.
+
+## Original description
+
 An external ESPHome component to control a boiler (or other supported HVAC appliances) over the OpenTherm protocol. Note that special hardware is required, like the [DIYLESS Master OpenTherm Shield](https://diyless.com/product/master-opentherm-shield) or [Ihor Melnyk's OpenTherm Adapter](http://ihormelnyk.com/opentherm_adapter). This component acts only as an OpenTherm master (i.e. a thermostat or controller) and not as a slave or gateway. You can no longer use your existing thermostat if you control your boiler through ESPHome with this component.
 
 We aim for maximum flexibility in this component by exposing most of the information available through the OpenTherm protocol, while allowing all configuration in YAML. (No custom component code required!) Since every boiler and every situation is different, you have to play around a bit with the sensors you'd want to read. There is no requirement for a boiler to support everything in the protocol, so not every sensor in this component will work with your boiler. (For example, my Remeha Avanta does not report `ch_pressure`, `dhw_flow_rate` or `t_dhw`.) <!-- #2: We try to be smart about this and not send request messages for these if the boiler consistently indicates it doesn't understand the message or the data is unavailable. You'll find warning messages indicating this behaviour in the ESPHome logs. -->
@@ -178,7 +188,7 @@ The component can report boiler status on several binary sensors. The *Status* s
 - `control_type_on_off`: Configuration: Control type is on/off
 - `cooling_supported`: Configuration: Cooling supported
 - `dhw_storage_tank`: Configuration: DHW storage tank
-- `master_pump_control_allowed`: Configuration: Master pump control allowed
+- `controller_pump_control_allowed`: Configuration: Controller pump control allowed
 - `ch2_present`: Configuration: CH2 present
 - `dhw_setpoint_transfer_enabled`: Remote boiler parameters: DHW setpoint transfer enabled
 - `max_ch_setpoint_transfer_enabled`: Remote boiler parameters: CH maximum setpoint transfer enabled
