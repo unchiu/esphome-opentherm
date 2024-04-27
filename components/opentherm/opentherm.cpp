@@ -1,6 +1,18 @@
+/*
+ * OpenTherm protocol implementation. Originally taken from https://github.com/jpraus/arduino-opentherm, but
+ * heavily modified to comply with ESPHome coding standards and provide better logging.
+ * Original code is licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+ * Public License, which is compatible with GPLv3 license, which covers C++ part of ESPHome project.
+ */
+
 #include "opentherm.h"
 #include "esphome/core/helpers.h"
+#ifdef ESP32
 #include "driver/timer.h"
+#endif
+#ifdef ESP8266
+#include "Arduino.h"
+#endif
 #include <string>
 #include <sstream>
 #include <bitset>
@@ -13,7 +25,7 @@ using std::bitset;
 using std::stringstream;
 using std::to_string;
 
-OpenTherm::OpenTherm(InternalGPIOPin *in_pin, InternalGPIOPin *out_pin, int32_t slave_timeout)
+OpenTherm::OpenTherm(InternalGPIOPin *in_pin, InternalGPIOPin *out_pin, int32_t device_timeout)
     : in_pin_(in_pin),
       out_pin_(out_pin),
       mode_(OperationMode::IDLE),
@@ -25,23 +37,23 @@ OpenTherm::OpenTherm(InternalGPIOPin *in_pin, InternalGPIOPin *out_pin, int32_t 
       active_(false),
       timeout_counter_(-1),
       timer_initialized_(false),
-      slave_timeout_(slave_timeout) {
+      device_timeout_(device_timeout) {
   isr_in_pin_ = in_pin->to_isr();
   isr_out_pin_ = out_pin->to_isr();
 }
 
 void OpenTherm::begin() {
+#ifdef ESP8266
+  instance_ = this;
+#endif
   in_pin_->pin_mode(gpio::FLAG_INPUT);
   out_pin_->pin_mode(gpio::FLAG_OUTPUT);
   out_pin_->digital_write(true);
-
-  // delay(1000); // It was here in Igor Melnik's library, but there is nothing like this in arduino-opentherm
-  // library example. Commenting out for now.
 }
 
 void OpenTherm::listen() {
   stop_();
-  this->timeout_counter_ = slave_timeout_ * 5;  // timer_ ticks at 5 ticks/ms
+  this->timeout_counter_ = device_timeout_ * 5;  // timer_ ticks at 5 ticks/ms
 
   mode_ = OperationMode::LISTEN;
   active_ = true;
@@ -180,7 +192,7 @@ bool IRAM_ATTR OpenTherm::timer_isr(OpenTherm *arg) {
     if (arg->bit_pos_ == 33 || arg->bit_pos_ == 0) {  // start bit
       arg->write_bit_(1, arg->clock_);
     } else {  // data bits
-      arg->write_bit_(bitRead(arg->data_, arg->bit_pos_ - 1), arg->clock_);
+      arg->write_bit_(readBit(arg->data_, arg->bit_pos_ - 1), arg->clock_);
     }
     if (arg->clock_ == 0) {
       if (arg->bit_pos_ <= 0) {            // check termination
@@ -196,6 +208,10 @@ bool IRAM_ATTR OpenTherm::timer_isr(OpenTherm *arg) {
 
   return false;
 }
+
+#ifdef ESP8266
+void IRAM_ATTR OpenTherm::esp8266_timer_isr() { timer_isr(instance_); }
+#endif
 
 void IRAM_ATTR OpenTherm::bit_read_(uint8_t value) {
   data_ = (data_ << 1) | value;
@@ -218,7 +234,7 @@ void IRAM_ATTR OpenTherm::write_bit_(uint8_t high, uint8_t clock) {
   }
 }
 
-// #ifdef ESP32
+#ifdef ESP32
 
 void IRAM_ATTR OpenTherm::init_timer_() {
   if (timer_initialized_)
@@ -274,7 +290,32 @@ void IRAM_ATTR OpenTherm::stop_timer_() {
   }
 }
 
-// #endif  // END ESP32
+#endif  // END ESP32
+
+#ifdef ESP8266
+// 5 kHz timer_
+void OpenTherm::start_read_timer_() {
+  InterruptLock const lock;
+  timer1_attachInterrupt(esp8266_timer_isr);
+  timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP);  // 5MHz (5 ticks/us - 1677721.4 us max)
+  timer1_write(1000);                            // 5kHz
+}
+
+// 2 kHz timer_
+void OpenTherm::start_write_timer_() {
+  InterruptLock const lock;
+  timer1_attachInterrupt(esp8266_timer_isr);
+  timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP);  // 5MHz (5 ticks/us - 1677721.4 us max)
+  timer1_write(2500);                            // 2kHz
+}
+
+void OpenTherm::stop_timer_() {
+  InterruptLock const lock;
+  timer1_disable();
+  timer1_detachInterrupt();
+}
+
+#endif  // END ESP8266
 
 // https://stackoverflow.com/questions/21617970/how-to-check-if-value-has-even-parity-of-bits-or-odd
 bool OpenTherm::check_parity_(uint32_t val) {
@@ -333,8 +374,8 @@ const char *OpenTherm::message_id_to_str(MessageId id) {
   switch (id) {
     TO_STRING_MEMBER(STATUS)
     TO_STRING_MEMBER(CH_SETPOINT)
-    TO_STRING_MEMBER(MASTER_CONFIG)
-    TO_STRING_MEMBER(SLAVE_CONFIG)
+    TO_STRING_MEMBER(CONTROLLER_CONFIG)
+    TO_STRING_MEMBER(DEVICE_CONFIG)
     TO_STRING_MEMBER(COMMAND_CODE)
     TO_STRING_MEMBER(FAULT_FLAGS)
     TO_STRING_MEMBER(REMOTE)
@@ -373,7 +414,7 @@ const char *OpenTherm::message_id_to_str(MessageId id) {
     TO_STRING_MEMBER(OTC_CURVE_RATIO)
     TO_STRING_MEMBER(HVAC_STATUS)
     TO_STRING_MEMBER(REL_VENT_SETPOINT)
-    TO_STRING_MEMBER(SLAVE_VENT)
+    TO_STRING_MEMBER(DEVICE_VENT)
     TO_STRING_MEMBER(REL_VENTILATION)
     TO_STRING_MEMBER(REL_HUMID_EXHAUST)
     TO_STRING_MEMBER(SUPPLY_INLET_TEMP)
@@ -391,10 +432,10 @@ const char *OpenTherm::message_id_to_str(MessageId id) {
     TO_STRING_MEMBER(CH_PUMP_HOURS)
     TO_STRING_MEMBER(DHW_PUMP_HOURS)
     TO_STRING_MEMBER(DHW_BURNER_HOURS)
-    TO_STRING_MEMBER(OT_VERSION_MASTER)
-    TO_STRING_MEMBER(OT_VERSION_SLAVE)
-    TO_STRING_MEMBER(VERSION_MASTER)
-    TO_STRING_MEMBER(VERSION_SLAVE)
+    TO_STRING_MEMBER(OT_VERSION_CONTROLLER)
+    TO_STRING_MEMBER(OT_VERSION_DEVICE)
+    TO_STRING_MEMBER(VERSION_CONTROLLER)
+    TO_STRING_MEMBER(VERSION_DEVICE)
     default:
       return "<INVALID>";
   }
@@ -461,43 +502,6 @@ void OpenthermData::s16(int16_t value) {
   valueLB = value & 0xFF;
   valueHB = (value >> 8) & 0xFF;
 }
-
-// #ifdef ESP8266
-//// 5 kHz timer_
-// void OpenTherm::start_read_timer_() {
-//   noInterrupts();
-//   timer1_attachInterrupt(OpenTherm::timer_isr);
-//   timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP);  // 5MHz (5 ticks/us - 1677721.4 us max)
-//   timer1_write(1000);                            // 5kHz
-//   interrupts();
-// }
-//
-//// 2 kHz timer_
-// void OpenTherm::start_write_timer_() {
-//   noInterrupts();
-//   timer1_attachInterrupt(OpenTherm::timer_isr);
-//   timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP);  // 5MHz (5 ticks/us - 1677721.4 us max)
-//   timer1_write(2500);                            // 2kHz
-//   interrupts();
-// }
-//
-//// 1 kHz timer_
-// void OpenTherm::_startTimeoutTimer() {
-//   noInterrupts();
-//   timer1_attachInterrupt(OpenTherm::timer_isr);
-//   timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP);  // 5MHz (5 ticks/us - 1677721.4 us max)
-//   timer1_write(5000);                            // 1kHz
-//   interrupts();
-// }
-//
-// void OpenTherm::stop_timer_() {
-//   noInterrupts();
-//   timer1_disable();
-//   timer1_detachInterrupt();
-//   interrupts();
-// }
-//
-// #endif  // END ESP8266
 
 }  // namespace opentherm
 }  // namespace esphome

@@ -1,3 +1,10 @@
+/*
+ * OpenTherm protocol implementation. Originally taken from https://github.com/jpraus/arduino-opentherm, but
+ * heavily modified to comply with ESPHome coding standards and provide better logging.
+ * Original code is licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+ * Public License, which is compatible with GPLv3 license, which covers C++ part of ESPHome project.
+ */
+
 #pragma once
 
 #include <string>
@@ -5,18 +12,10 @@
 #include <iomanip>
 #include "esphome/core/hal.h"
 
-#ifdef ESP8266
-#ifndef IRAM_ATTR
-#define IRAM_ATTR ICACHE_RAM_ATTR
-#endif
-#endif
-
-// The only thing we want from Arduino :)
-#define bitRead(value, bit) (((value) >> (bit)) & 0x01)
-#define bitSet(value, bit) ((value) |= (1UL << (bit)))
-#define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
-#define bitToggle(value, bit) ((value) ^= (1UL << (bit)))
-#define bitWrite(value, bit, bitvalue) ((bitvalue) ? bitSet(value, bit) : bitClear(value, bit))
+#define readBit(value, bit) (((value) >> (bit)) & 0x01)
+#define setBit(value, bit) ((value) |= (1UL << (bit)))
+#define clearBit(value, bit) ((value) &= ~(1UL << (bit)))
+#define writeBit(value, bit, bitvalue) ((bitvalue) ? setBit(value, bit) : clearBit(value, bit))
 
 namespace esphome {
 namespace opentherm {
@@ -56,8 +55,8 @@ enum MessageType {
 enum MessageId {
   STATUS = 0,
   CH_SETPOINT = 1,
-  MASTER_CONFIG = 2,
-  SLAVE_CONFIG = 3,
+  CONTROLLER_CONFIG = 2,
+  DEVICE_CONFIG = 3,
   COMMAND_CODE = 4,
   FAULT_FLAGS = 5,
   REMOTE = 6,
@@ -98,7 +97,7 @@ enum MessageId {
   // HVAC Specific Message IDs
   HVAC_STATUS = 70,
   REL_VENT_SETPOINT = 71,
-  SLAVE_VENT = 74,
+  DEVICE_VENT = 74,
   REL_VENTILATION = 77,
   REL_HUMID_EXHAUST = 78,
   SUPPLY_INLET_TEMP = 80,
@@ -117,10 +116,10 @@ enum MessageId {
   CH_PUMP_HOURS = 121,
   DHW_PUMP_HOURS = 122,
   DHW_BURNER_HOURS = 123,
-  OT_VERSION_MASTER = 124,
-  OT_VERSION_SLAVE = 125,
-  VERSION_MASTER = 126,
-  VERSION_SLAVE = 127
+  OT_VERSION_CONTROLLER = 124,
+  OT_VERSION_DEVICE = 125,
+  VERSION_CONTROLLER = 126,
+  VERSION_DEVICE = 127
 };
 
 enum BitPositions { STOP_BIT = 33 };
@@ -181,7 +180,7 @@ struct OpenThermError {
  */
 class OpenTherm {
  public:
-  OpenTherm(InternalGPIOPin *in_pin, InternalGPIOPin *out_pin, int32_t slave_timeout = 800);
+  OpenTherm(InternalGPIOPin *in_pin, InternalGPIOPin *out_pin, int32_t device_timeout = 800);
 
   /**
    * Setup pins.
@@ -284,6 +283,10 @@ class OpenTherm {
 
   static bool timer_isr(OpenTherm *arg);
 
+#ifdef ESP8266
+  static void esp8266_timer_isr();
+#endif
+
  private:
   InternalGPIOPin *in_pin_;
   InternalGPIOPin *out_pin_;
@@ -300,7 +303,7 @@ class OpenTherm {
   volatile int32_t timeout_counter_;  // <0 no timeout
   volatile bool timer_initialized_;
 
-  int32_t slave_timeout_;
+  int32_t device_timeout_;
 
   void read_();  // data detected start reading
   void stop_();  // stop timers and interrupts
@@ -314,6 +317,11 @@ class OpenTherm {
   void bit_read_(uint8_t value);
   ProtocolErrorType verify_stop_bit_(uint8_t value);
   void write_bit_(uint8_t high, uint8_t clock);
+
+#ifdef ESP8266
+  // ESP8266 timer can accept callback with no parameters, so we have this hack to save a static instance of OpenTherm
+  static OpenTherm *instance_;
+#endif
 };
 
 template<typename T> void int_to_hex(std::stringstream &stream, T i) {
