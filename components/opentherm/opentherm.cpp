@@ -242,11 +242,10 @@ bool OpenTherm::init_esp32_timer_() {
   for (; cur_timer < SOC_TIMER_GROUP_TOTAL_TIMERS; cur_timer++) {
     timer_config_t temp_config;
     timer_group = cur_timer < 2 ? TIMER_GROUP_0 : TIMER_GROUP_1;
-    timer_idx = cur_timer < 2 ? (timer_idx_t)cur_timer : (timer_idx_t)(cur_timer - 2);
+    timer_idx = cur_timer < 2 ? (timer_idx_t) cur_timer : (timer_idx_t) (cur_timer - 2);
 
     auto err = timer_get_config(timer_group, timer_idx, &temp_config);
-    if (err == ESP_ERR_INVALID_ARG)
-    {
+    if (err == ESP_ERR_INVALID_ARG) {
       // Error means timer was not initialized (or other things, but we are careful with our args)
       timer_found = true;
       break;
@@ -255,8 +254,7 @@ bool OpenTherm::init_esp32_timer_() {
     ESP_LOGD(OT_TAG, "Timer %d:%d seems to be occupied, will try another", timer_group, timer_idx);
   }
 
-  if (!timer_found)
-  {
+  if (!timer_found) {
     ESP_LOGE(OT_TAG, "No free timer was found! OpenTherm cannot function without a timer.");
     return false;
   }
@@ -277,8 +275,7 @@ bool OpenTherm::init_esp32_timer_() {
   esp_err_t result;
 
   result = timer_init(timer_group_, timer_idx_, &config);
-  if (result != ESP_OK)
-  {
+  if (result != ESP_OK) {
     auto error = esp_err_to_name(result);
     ESP_LOGE(OT_TAG, "Failed to init timer. Error: %s", error);
     return false;
@@ -321,34 +318,34 @@ void IRAM_ATTR OpenTherm::start_timer_(uint64_t alarm_value) {
 
 // 5 kHz timer_
 void IRAM_ATTR OpenTherm::start_read_timer_() {
-    InterruptLock const lock;
-    start_timer_(200);
+  InterruptLock const lock;
+  start_timer_(200);
 }
 
 // 2 kHz timer_
 void IRAM_ATTR OpenTherm::start_write_timer_() {
-    InterruptLock const lock;
-    start_timer_(500);
+  InterruptLock const lock;
+  start_timer_(500);
 }
 
 void IRAM_ATTR OpenTherm::stop_timer_() {
-    InterruptLock const lock;
+  InterruptLock const lock;
 
-    esp_err_t result;
+  esp_err_t result;
 
-    result = timer_pause(timer_group_, timer_idx_);
-    if (result != ESP_OK) {
-      auto error = esp_err_to_name(result);
-      ESP_LOGE(OT_TAG, "Failed to pause the timer. Error: %s", error);
-      return;
-    }
+  result = timer_pause(timer_group_, timer_idx_);
+  if (result != ESP_OK) {
+    auto error = esp_err_to_name(result);
+    ESP_LOGE(OT_TAG, "Failed to pause the timer. Error: %s", error);
+    return;
+  }
 
-    result = timer_set_counter_value(timer_group_, timer_idx_, 0);
-    if (result != ESP_OK) {
-      auto error = esp_err_to_name(result);
-      ESP_LOGE(OT_TAG, "Failed to set timer counter to 0 after pausing. Error: %s", error);
-      return;
-    }
+  result = timer_set_counter_value(timer_group_, timer_idx_, 0);
+  if (result != ESP_OK) {
+    auto error = esp_err_to_name(result);
+    ESP_LOGE(OT_TAG, "Failed to set timer counter to 0 after pausing. Error: %s", error);
+    return;
+  }
 }
 
 #endif  // END ESP32
