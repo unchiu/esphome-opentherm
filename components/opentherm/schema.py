@@ -213,7 +213,7 @@ SENSORS: Schema[SensorSchema] = Schema(
                 "state_class": STATE_CLASS_MEASUREMENT,
                 "message": "FAN_SPEED",
                 "keep_updated": True,
-                "message_data": "s16",
+                "message_data": "u16",
             }
         ),
         "flame_current": SensorSchema(
