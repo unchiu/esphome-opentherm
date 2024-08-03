@@ -14,7 +14,7 @@ An external ESPHome component to control a boiler (or other supported HVAC appli
 
 We aim for maximum flexibility in this component by exposing most of the information available through the OpenTherm protocol, while allowing all configuration in YAML. (No custom component code required!) Since every boiler and every situation is different, you have to play around a bit with the sensors you'd want to read. There is no requirement for a boiler to support everything in the protocol, so not every sensor in this component will work with your boiler. (For example, my Remeha Avanta does not report `ch_pressure`, `dhw_flow_rate` or `t_dhw`.) <!-- #2: We try to be smart about this and not send request messages for these if the boiler consistently indicates it doesn't understand the message or the data is unavailable. You'll find warning messages indicating this behaviour in the ESPHome logs. -->
 
-This component uses [@ihormelnyk's OpenTherm Library](https://github.com/ihormelnyk/opentherm_library) (MIT licensed) as its communication layer. The message loop is inspired by code for the [DIYLESS ESP32 Wi-Fi Thermostat](https://github.com/diyless/esp32-wifi-thermostat) (MIT licensed).
+This component a uses modified version of [@Jiří Praus' OpenTherm Library](https://github.com/jpraus/arduino-opentherm) (creative Commons licensed) as its communication layer. The message loop is inspired by code for the [DIYLESS ESP32 Wi-Fi Thermostat](https://github.com/diyless/esp32-wifi-thermostat) (MIT licensed).
 
 Alternatives:
 - [ESPHome-OpenTherm by @rsciriano](https://github.com/rsciriano/ESPHome-OpenTherm), a custom component based on the same library as this project
@@ -213,6 +213,8 @@ The boiler can also report several numerical values, which are available through
 - `t_flow_ch2`: Flow water temperature CH2 circuit (°C)
 - `t_dhw2`: Domestic hot water temperature 2 (°C)
 - `t_exhaust`: Boiler exhaust temperature (°C)
+- `fan_speed`: Boiler fan speed (RPM)
+- `flame_current`: Boiler flame current (µA)
 - `burner_starts`: Number of starts burner
 - `ch_pump_starts`: Number of starts CH pump
 - `dhw_pump_valve_starts`: Number of starts DHW pump/valve

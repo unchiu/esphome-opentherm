@@ -5,8 +5,12 @@ from typing import Generic, TypeVar, TypedDict, Optional
 
 from esphome.const import (
     UNIT_CELSIUS,
+    UNIT_MICROAMP,
     UNIT_PERCENT,
+    UNIT_REVOLUTIONS_PER_MINUTE,
     DEVICE_CLASS_COLD,
+    DEVICE_CLASS_CURRENT,
+    DEVICE_CLASS_EMPTY,
     DEVICE_CLASS_HEAT,
     DEVICE_CLASS_PRESSURE,
     DEVICE_CLASS_PROBLEM,
@@ -562,6 +566,7 @@ SWITCHES: Schema[SwitchSchema] = Schema(
                 "message": "STATUS",
                 "keep_updated": True,
                 "message_data": "flag8_hb_0",
+                "default_mode": "restore_default_on"
             }
         ),
         "dhw_enable": SwitchSchema(
@@ -570,6 +575,7 @@ SWITCHES: Schema[SwitchSchema] = Schema(
                 "message": "STATUS",
                 "keep_updated": True,
                 "message_data": "flag8_hb_1",
+                "default_mode": "restore_default_on"
             }
         ),
         "cooling_enable": SwitchSchema(
@@ -578,6 +584,7 @@ SWITCHES: Schema[SwitchSchema] = Schema(
                 "message": "STATUS",
                 "keep_updated": True,
                 "message_data": "flag8_hb_2",
+                "default_mode": "restore_default_off"
             }
         ),
         "otc_active": SwitchSchema(
@@ -586,6 +593,7 @@ SWITCHES: Schema[SwitchSchema] = Schema(
                 "message": "STATUS",
                 "keep_updated": True,
                 "message_data": "flag8_hb_3",
+                "default_mode": "restore_default_off"
             }
         ),
         "ch2_active": SwitchSchema(
@@ -594,6 +602,7 @@ SWITCHES: Schema[SwitchSchema] = Schema(
                 "message": "STATUS",
                 "keep_updated": True,
                 "message_data": "flag8_hb_4",
+                "default_mode": "restore_default_off"
             }
         ),
     }
