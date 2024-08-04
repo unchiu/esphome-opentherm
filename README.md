@@ -161,9 +161,9 @@ The following switches are available:
 
 <!-- BEGIN schema_docs:switch -->
 - `ch_enable`: Central Heating enabled  
-  Defaults to *True*
+  Defaults to *False*
 - `dhw_enable`: Domestic Hot Water enabled  
-  Defaults to *True*
+  Defaults to *False*
 - `cooling_enable`: Cooling enabled  
   Defaults to *False*
 - `otc_active`: Outside temperature compensation active  
