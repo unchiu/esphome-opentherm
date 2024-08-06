@@ -134,6 +134,10 @@ The following inputs are available:
 - `t_room`: Current sensed room temperature (informational) (°C)  
   Default `min_value`: -40  
   Default `max_value`: 127
+- `max_rel_mod_level`: Maximum relative modulation level (%)  
+  Default `min_value`: 0  
+  Default `max_value`: 127  
+  Supports `auto_min_value`
 <!-- END schema_docs:input -->
 
 ### Switch
@@ -229,4 +233,12 @@ The boiler can also report several numerical values, which are available through
 - `max_t_set_lb`: Lower bound for adjustment of max CH setpoint (°C)
 - `t_dhw_set`: Domestic hot water temperature setpoint (°C)
 - `max_t_set`: Maximum allowable CH water setpoint (°C)
+- `oem_fault_code`: OEM fault code ()
+- `oem_diagnostic_code`: OEM diagnostic code ()
+- `max_capacity`: Maximum boiler capacity (KW) (kW)
+- `min_mod_level`: Minimum modulation level (%)
+- `opentherm_version_slave`: Version of OpenTherm implemented by slave ()
+- `slave_type`: Slave product type ()
+- `slave_version`: Slave product version ()
+- `slave_id`: Slave ID code ()
 <!-- END schema_docs:sensor -->
