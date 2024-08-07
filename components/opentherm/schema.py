@@ -395,7 +395,6 @@ SENSORS: Schema[SensorSchema] = Schema(
                 "message_data": "f88",
             }
         ),
-
         "oem_fault_code": SensorSchema(
             {
                 "description": "OEM fault code",
@@ -491,7 +490,6 @@ SENSORS: Schema[SensorSchema] = Schema(
                 "message_data": "u8_lb",
             }
         ),
-
     }
 )
 
@@ -840,9 +838,11 @@ INPUTS: Schema[InputSchema] = Schema(
                 "keep_updated": True,
                 "message_data": "f88",
                 "range": (0, 127),
-                "auto_min_value": { "message": "MaxCapacityMinModLevel", "message_data": "u8_lb" },
+                "auto_min_value": {
+                    "message": "MaxCapacityMinModLevel",
+                    "message_data": "u8_lb",
+                },
             }
         ),
-
     }
 )

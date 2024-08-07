@@ -1,4 +1,4 @@
-#include "esphome/core/helpers.h" // for clamp() and lerp()
+#include "esphome/core/helpers.h"  // for clamp() and lerp()
 #include "output.h"
 
 namespace esphome {
