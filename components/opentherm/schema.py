@@ -443,9 +443,9 @@ SENSORS: Schema[SensorSchema] = Schema(
                 "message_data": "u8_lb",
             }
         ),
-        "opentherm_version_slave": SensorSchema(
+        "opentherm_version_device": SensorSchema(
             {
-                "description": "Version of OpenTherm implemented by slave",
+                "description": "Version of OpenTherm implemented by device",
                 "unit_of_measurement": UNIT_EMPTY,
                 "accuracy_decimals": 0,
                 "state_class": STATE_CLASS_NONE,
@@ -455,9 +455,9 @@ SENSORS: Schema[SensorSchema] = Schema(
                 "message_data": "f88",
             }
         ),
-        "slave_type": SensorSchema(
+        "device_type": SensorSchema(
             {
-                "description": "Slave product type",
+                "description": "Device product type",
                 "unit_of_measurement": UNIT_EMPTY,
                 "accuracy_decimals": 0,
                 "state_class": STATE_CLASS_NONE,
@@ -467,9 +467,9 @@ SENSORS: Schema[SensorSchema] = Schema(
                 "message_data": "u8_hb",
             }
         ),
-        "slave_version": SensorSchema(
+        "device_version": SensorSchema(
             {
-                "description": "Slave product version",
+                "description": "Device product version",
                 "unit_of_measurement": UNIT_EMPTY,
                 "accuracy_decimals": 0,
                 "state_class": STATE_CLASS_NONE,
@@ -479,9 +479,9 @@ SENSORS: Schema[SensorSchema] = Schema(
                 "message_data": "u8_lb",
             }
         ),
-        "slave_id": SensorSchema(
+        "device_id": SensorSchema(
             {
-                "description": "Slave ID code",
+                "description": "Device ID code",
                 "unit_of_measurement": UNIT_EMPTY,
                 "accuracy_decimals": 0,
                 "state_class": STATE_CLASS_NONE,
