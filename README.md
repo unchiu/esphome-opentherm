@@ -237,8 +237,8 @@ The boiler can also report several numerical values, which are available through
 - `oem_diagnostic_code`: OEM diagnostic code ()
 - `max_capacity`: Maximum boiler capacity (KW) (kW)
 - `min_mod_level`: Minimum modulation level (%)
-- `opentherm_version_slave`: Version of OpenTherm implemented by slave ()
-- `slave_type`: Slave product type ()
-- `slave_version`: Slave product version ()
-- `slave_id`: Slave ID code ()
+- `opentherm_version_device`: Version of OpenTherm implemented by slave ()
+- `device_type`: Slave product type ()
+- `device_version`: Slave product version ()
+- `device_id`: Slave ID code ()
 <!-- END schema_docs:sensor -->
