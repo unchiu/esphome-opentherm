@@ -7,7 +7,7 @@ from esphome.const import (
     UNIT_CELSIUS,
     UNIT_EMPTY,
     UNIT_KILOWATT,
-    UNIT_MICROAMP,
+    # UNIT_MICROAMP, # Uncomment this when UNIT_MICROAMP hits ESPHome release.
     UNIT_PERCENT,
     UNIT_REVOLUTIONS_PER_MINUTE,
     DEVICE_CLASS_COLD,
@@ -223,10 +223,11 @@ SENSORS: Schema[SensorSchema] = Schema(
                 "message_data": "u16",
             }
         ),
-        "flame_current": SensorSchema(
+        # "flame_current": SensorSchema(
             {
                 "description": "Boiler flame current",
-                "unit_of_measurement": UNIT_MICROAMP,
+                # "unit_of_measurement": UNIT_MICROAMP,
+                "unit_of_measurement": UNIT_EMPTY, # Temporary, until UNIT_MICROAMP hits ESPHome release
                 "accuracy_decimals": 0,
                 "device_class": DEVICE_CLASS_CURRENT,
                 "state_class": STATE_CLASS_MEASUREMENT,
