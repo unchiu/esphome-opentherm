@@ -223,7 +223,7 @@ SENSORS: Schema[SensorSchema] = Schema(
                 "message_data": "u16",
             }
         ),
-        # "flame_current": SensorSchema(
+        "flame_current": SensorSchema(
             {
                 "description": "Boiler flame current",
                 # "unit_of_measurement": UNIT_MICROAMP,
