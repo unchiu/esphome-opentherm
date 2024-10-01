@@ -20,7 +20,8 @@ def begins_section(line: str) -> str | None:
 
 def ends_section(line: str) -> bool:
     match = END_PATTERN.match(line)
-    return match != None
+    return match is not None
+
 
 def replace_docs(sections: Dict[str, str]) -> None:
     with open(README, "r") as f:
@@ -41,25 +42,25 @@ def replace_docs(sections: Dict[str, str]) -> None:
 
 sections = {
     "input": LINESEP.join([
-        f"- `{key}`: {sch['description']} ({sch['unit_of_measurement']})"
-        + MD_LINEBREAK + f"  Default `min_value`: {sch['range'][0]}"
-        + MD_LINEBREAK + f"  Default `max_value`: {sch['range'][1]}"
-        + (MD_LINEBREAK + f"  Supports `auto_min_value`" if "auto_min_value" in sch else "")
-        + (MD_LINEBREAK + f"  Supports `auto_max_value`" if "auto_max_value" in sch else "")
+        f"- `{key}`: {sch.description} ({sch.unit_of_measurement})"
+        + MD_LINEBREAK + f"  Default `min_value`: {sch.range[0]}"
+        + MD_LINEBREAK + f"  Default `max_value`: {sch.range[1]}"
+        + (MD_LINEBREAK + f"  Supports `auto_min_value`" if sch.auto_min_value is not None else "")
+        + (MD_LINEBREAK + f"  Supports `auto_max_value`" if sch.auto_max_value is not None else "")
         for key, sch in schema.INPUTS.items()
     ]) + LINESEP,
     "switch": LINESEP.join([
-        f"- `{key}`: {sch['description']}"
-        + MD_LINEBREAK + f"  Defaults to *{sch['default_mode'].endswith('on')}*"
+        f"- `{key}`: {sch.description}"
+        + MD_LINEBREAK + f"  Defaults to *{sch.default_mode.endswith('on')}*"
         for key, sch in schema.SWITCHES.items()
     ]) + LINESEP,
     "binary_sensor": LINESEP.join([
-        f"- `{key}`: {sch['description']}"
+        f"- `{key}`: {sch.description}"
         for key, sch in schema.BINARY_SENSORS.items()
     ]) + LINESEP,
     "sensor": LINESEP.join([
-        f"- `{key}`: {sch['description']}" 
-        + (f" ({sch['unit_of_measurement']})" if "unit_of_measurement" in sch else "")
+        f"- `{key}`: {sch.description}"
+        + (f" ({sch.unit_of_measurement})" if sch.unit_of_measurement is not None else "")
         for key, sch in schema.SENSORS.items()
     ]) + LINESEP,
 }

@@ -1,25 +1,32 @@
-# OpenTherm Master for ESPHome
+# OpenTherm Component for ESPHome
 
-## Fork description
-This is a fork of Arthur Rump's original OpenTherm component: https://github.com/arthurrump/esphome-opentherm. This fork was heavily modified and refactored:
+OpenTherm (OT) is a standard communications protocol used in central heating systems for the communication between
+central heating appliances and a thermostatic controller. As a standard, OpenTherm is independent of any single
+manufacturer. A controller from manufacturer A can in principle be used to control a boiler from manufacturer B.
 
-1. Ihor Melnik's OpenTherm library was replaced with a modified version of Jiří Praus' https://github.com/jpraus/arduino-opentherm library. In my opininion it's more robust and offers better debugging opportunities.
-2. Several outstanding pull requests from the original repository were integrated.
-3. The code was refactored according to current ESPHome codebase requirements.
-4. A pull request to include this component into ESPHome core was initiated: https://github.com/esphome/esphome/pull/6645.
+Since OpenTherm doesn't operate in a standard voltage range, special hardware is required. You can choose from several
+ready-made adapters or roll your own:
 
-## Original description
+- [DIYLESS Master OpenTherm Shield](https://diyless.com/product/master-opentherm-shield)
+- [Ihor Melnyk's OpenTherm Adapter](http://ihormelnyk.com/opentherm_adapter)
+- [Jiří Praus' OpenTherm Gateway Arduino Shield](https://www.tindie.com/products/jiripraus/opentherm-gateway-arduino-shield/)
 
-An external ESPHome component to control a boiler (or other supported HVAC appliances) over the OpenTherm protocol. Note that special hardware is required, like the [DIYLESS Master OpenTherm Shield](https://diyless.com/product/master-opentherm-shield) or [Ihor Melnyk's OpenTherm Adapter](http://ihormelnyk.com/opentherm_adapter). This component acts only as an OpenTherm master (i.e. a thermostat or controller) and not as a slave or gateway. You can no longer use your existing thermostat if you control your boiler through ESPHome with this component.
+‼️ As of now, this component acts only as an OpenTherm master (for example, a thermostat or controller) and not as a 
+slave or gateway. Your existing thermostat is not usable while you use ESPHome with this component to control your 
+boiler.
 
-We aim for maximum flexibility in this component by exposing most of the information available through the OpenTherm protocol, while allowing all configuration in YAML. (No custom component code required!) Since every boiler and every situation is different, you have to play around a bit with the sensors you'd want to read. There is no requirement for a boiler to support everything in the protocol, so not every sensor in this component will work with your boiler. (For example, my Remeha Avanta does not report `ch_pressure`, `dhw_flow_rate` or `t_dhw`.) <!-- #2: We try to be smart about this and not send request messages for these if the boiler consistently indicates it doesn't understand the message or the data is unavailable. You'll find warning messages indicating this behaviour in the ESPHome logs. -->
+There are plans to add support for a gateway mode, but I don't have any timeline to share at the moment.
 
-This component uses a modified version of [@Jiří Praus' OpenTherm Library](https://github.com/jpraus/arduino-opentherm) (Creative Commons licensed) as its communication layer. The message loop is inspired by code for the [DIYLESS ESP32 Wi-Fi Thermostat](https://github.com/diyless/esp32-wifi-thermostat) (MIT licensed).
+## OpenTherm in ESPHome core
 
-Alternatives:
-- [ESPHome-OpenTherm by @rsciriano](https://github.com/rsciriano/ESPHome-OpenTherm), a custom component based on the same library as this project
-- [esphome-opentherm by @wichers](https://github.com/wichers/esphome-opentherm), which works as a gateway, rather than a master, allowing you to combine the system with your own thermostat
-- And more options if you [search on GitHub](https://github.com/search?q=esphome+opentherm)
+Several pull requests to include this component into ESPHome core were initiated:
+   * https://github.com/esphome/esphome/pull/6645 — done
+   * https://github.com/esphome/esphome/pull/7463 — under review
+
+The code in those pull requests and this repo's `main` branch are kept in sync. There will be no need to reference
+this repo as an external component after it is merged into ESPHome.
+
+`develop` branch in this repo will contain bleeding edge code that is not yet proposed to be merged into ESPHome.
 
 ## Quick glossary
 
@@ -28,26 +35,63 @@ Alternatives:
 
 ## Usage
 
-The OpenTherm Master component is available as an external component in ESPHome and can be included in your configuration as follows:
+Until this component is merged into ESPHome core, you need to add this repository as external component to your config: 
 
 ```yaml
 external_components:
-  source: github://arthurrump/esphome-opentherm@main
+  source: github://olegtarasov/esphome-opentherm@main
 ```
 
-This references the main branch, which is cool if you want to stay up to date, but may also break your configuration if breaking changes happen here. A better idea would be to reference a specific version, see the tags for available versions. Instead of a specific version, you could also choose to follow a major version by specifying `@v1` etc.
+This references the main branch, which is cool if you want to stay up to date, but may also break your configuration 
+if breaking changes happen here. A better idea would be to reference a specific version, see the tags for available 
+versions. Instead of a specific version, you could also choose to follow a major version by specifying `@v1` etc.
 
-Then you can define the OpenTherm hub in your configuration:
+Then, you need to define the OpenTherm hub in your configuration. Note that most OpenTherm adapters label `in` and
+`out` pins relative to themselves; this component labels its `in` and `out` pins relative to the microcontroller
+ESPHome runs on. As such, your bridge's `in` pin becomes the hub's `out` pin and vice versa.
 
 ```yaml
 opentherm:
-  in_pin: 4
-  out_pin: 5
+  in_pin: GPIOXX
+  out_pin: GPIOXX
 ```
 
-### Usage as a thermostat
+### Configuration variables:
 
-The most important function for a thermostat is to set the boiler temperature setpoint. This component has three ways to provide this input: using a sensor from which the setpoint can be read, using a [number](https://esphome.io/components/number/index.html), or defining an output to which other components can write. For most users, the last option is the most useful one, as it can be combined with the [PID Climate](https://esphome.io/components/climate/pid.html) component to create a thermostat that works as you would expect a thermostat to work. See [thermostat-pid-basic.yaml](examples/thermostat-pid-basic.yaml) for an example.
+- `in_pin` (**Required**, number): The pin of the OpenTherm hardware bridge which is usually labeled ``out`` on the
+  board.
+- `out_pin` (**Required**, number): The pin of the OpenTherm hardware bridge which is usually labeled ``in`` on the
+  board.
+- `sync_mode` (**Optional**, boolean, default **false**): Synchronous communication mode prevents other components
+  from disabling interrupts while we are talking to the boiler. Enable if you experience a lot of random intermittent
+  invalid response errors (very likely to happen while using Dallas temperature sensors).
+- `id` (*Optional*): Manually specify the ID used for code generation.  Required if you have multiple buses.
+
+### Note abut sync mode
+
+The use of some components (like Dallas temperature sensors) may result in lost frames and protocol warnings from
+OpenTherm. Since OpenTherm is resilient by design and transmits its messages in a constant loop, these dropped frames
+don't usually cause any problems. Still, if you want to decrease the number of protocol warnings in your logs, you can
+enable `sync_mode` which will block ESPHome's main application loop until a single conversation with the boiler is
+complete. This can greatly reduce the number of dropped frames, but usually won't eliminate them entirely. With
+`sync_mode` enabled, in some cases, ESPHome's main application loop may be blocked for longer than is recommended,
+resulting in warnings in the logs. If this bothers you, you can adjust ESPHome's log level by adding the following to
+your configuration:
+
+```yaml
+logger:
+  logs:
+    component: ERROR
+```
+
+## Usage as a thermostat
+
+The most important function for a thermostat is to set the boiler temperature setpoint. This component has three ways
+to provide this input: using a Home Assistant sensor from which the setpoint can be read, using a
+[number](https://esphome.io/components/number/), or defining an output to which other components can write. 
+For most users, the last option is the most useful one, as it can be combined with the 
+[PID](https://esphome.io/components/climate/pid.html) component to create a thermostat that works as you would expect 
+a thermostat to work. See thermostat example further in this readme.
 
 ### Numerical input
 
@@ -66,6 +110,7 @@ There are three ways to set an input value:
   ```
 
   This can be useful if you have an external thermostat-like device that provides the setpoint as a sensor.
+
 - As a number:
   
   ```yaml
@@ -76,6 +121,7 @@ There are three ways to set an input value:
   ```
 
   This is useful if you want full control over your boiler and want to manually set all values.
+
 - As an output:
   
   ```yaml
@@ -94,12 +140,17 @@ There are three ways to set an input value:
       # ...
   ```
 
-For the output and number variants, there are four more properties you can configure beyond those included in the output and number components by default:
+For the output and number variants, there are four more properties you can configure beyond those included in the 
+output and number components by default:
 
-- `min_value` (float): The minimum value. For a number this is the minimum value you are allowed to input. For an output this is the number that will be sent to the boiler when the output is at 0%.
-- `max_value` (float): The maximum value. For a number this is the maximum value you are allowed to input. For an output this is the number that will be sent to the boiler when the output is at 100%.
-- `auto_max_value` (boolean): Automatically configure the maximum value to a value reported by the boiler. Not available for all inputs.
-- `auto_min_value` (boolean): Automatically configure the minimum value to a value reported by the boiler. Not available for all inputs.
+- `min_value` (float): The minimum value. For a number this is the minimum value you are allowed to input. 
+For an output this is the number that will be sent to the boiler when the output is at 0%.
+- `max_value` (float): The maximum value. For a number this is the maximum value you are allowed to input. 
+For an output this is the number that will be sent to the boiler when the output is at 100%.
+- `auto_max_value` (boolean): Automatically configure the maximum value to a value reported by the boiler. 
+Not available for all inputs.
+- `auto_min_value` (boolean): Automatically configure the minimum value to a value reported by the boiler. 
+Not available for all inputs.
 
 The following inputs are available:
 
@@ -136,13 +187,27 @@ The following inputs are available:
   Default `max_value`: 127
 - `max_rel_mod_level`: Maximum relative modulation level (%)  
   Default `min_value`: 0  
+  Default `max_value`: 100
+- `otc_hc_ratio`: OTC heat curve ratio (°C)  
+  Default `min_value`: 0  
   Default `max_value`: 127  
-  Supports `auto_min_value`
+  Supports `auto_min_value`  
+  Supports `auto_max_value`
 <!-- END schema_docs:input -->
 
 ### Switch
 
-For five status codes, switches are available to toggle them manually. The same values can be set in the hub configuration, like so:
+Switches are available to allow manual toggling of any of the following seven status codes:
+
+- `ch_enable`: Central Heating enabled
+- `dhw_enable`: Domestic Hot Water enabled
+- `cooling_enable`: Cooling enabled
+- `otc_active`: Outside temperature compensation active
+- `ch2_active`: Central Heating 2 active
+- `summer_mode_active`: Summer mode active
+- `dhw_block`: Block DHW
+
+If you do not wish to have switches, the same values can be permanently set in the hub configuration, like so:
 
 ```yaml
 opentherm:
@@ -150,35 +215,29 @@ opentherm:
   dhw_enable: true
 ```
 
-This can be used to set the value without the need for a switch if you'd never want to toggle it after the initial configuration. The default values for these configuration options are listed below.
+This is useful when you'd never want to toggle it after the initial configuration.
 
-For enabling of central heating and cooling, the enable-flag is only sent to the boiler if the following conditions are met:
+The default values for these configuration variables are listed below.
+
+To enable central heating and cooling, the flag is only sent to the boiler if the following conditions are met:
+
 - the flag is set to true in the hub configuration,
-- the switch is on, if it is configured,
-- the setpoint or cooling control value is not 0, if it is configured.
+- the switch is on (if configured),
+- the setpoint or cooling control value is not 0 (if configured)
 
 For domestic hot water and outside temperature compensation, only the first two conditions are necessary.
 
-The last point ensures that central heating is not enabled if no heating is requested as indicated by a setpoint of 0. If you use a number as the setpoint input and use a minimum value higher than 0, you NEED to use the ch_enable switch to turn off your central heating. In that case the flag will be set to true in the hub configuration, and setpoint is always larger than 0, so including a switch is the only way you can turn off central heating. (This also holds for cooling and CH2.)
-
-The following switches are available:
-
-<!-- BEGIN schema_docs:switch -->
-- `ch_enable`: Central Heating enabled  
-  Defaults to *False*
-- `dhw_enable`: Domestic Hot Water enabled  
-  Defaults to *False*
-- `cooling_enable`: Cooling enabled  
-  Defaults to *False*
-- `otc_active`: Outside temperature compensation active  
-  Defaults to *False*
-- `ch2_active`: Central Heating 2 active  
-  Defaults to *False*
-<!-- END schema_docs:switch -->
+The last point ensures that central heating is not enabled if no heating is requested as indicated by a setpoint of 0.
+If you use a number as the setpoint input and use a minimum value higher than 0, you **must** use the ``ch_enable``
+switch to turn off your central heating. In such a case, the flag will be set to true in the hub configuration and the
+setpoint is always larger than 0, so including a switch is the only way you can turn off central heating. (This also
+holds for cooling and CH2.)
 
 ### Binary sensor
 
-The component can report boiler status on several binary sensors. The *Status* sensors are updated in each message cycle, while the others are only set during initialization, as they are unlikely to change without restarting the boiler.
+The component can report boiler status on several binary sensors. The *Status* sensors are updated in each message
+cycle, while the others are only set during initialization, as they are unlikely to change without restarting the
+boiler.
 
 <!-- BEGIN schema_docs:binary_sensor -->
 - `fault_indication`: Status: Fault indication
@@ -202,7 +261,9 @@ The component can report boiler status on several binary sensors. The *Status* s
 
 ### Sensor
 
-The boiler can also report several numerical values, which are available through sensors. Your boiler may not support all of these values, in which case there won't be any value published to that sensor. The following sensors are available:
+The boiler can also report several numerical values, which are available through sensors. Your boiler may not support
+all of these values, in which case there won't be any value published to that sensor. The following sensors are
+available:
 
 <!-- BEGIN schema_docs:sensor -->
 - `rel_mod_level`: Relative modulation level (%)
@@ -237,8 +298,119 @@ The boiler can also report several numerical values, which are available through
 - `oem_diagnostic_code`: OEM diagnostic code ()
 - `max_capacity`: Maximum boiler capacity (KW) (kW)
 - `min_mod_level`: Minimum modulation level (%)
-- `opentherm_version_device`: Version of OpenTherm implemented by slave ()
-- `device_type`: Slave product type ()
-- `device_version`: Slave product version ()
-- `device_id`: Slave ID code ()
+- `opentherm_version_device`: Version of OpenTherm implemented by device ()
+- `device_type`: Device product type ()
+- `device_version`: Device product version ()
+- `device_id`: Device ID code ()
+- `otc_hc_ratio_ub`: OTC heat curve ratio upper bound ()
+- `otc_hc_ratio_lb`: OTC heat curve ratio lower bound ()
 <!-- END schema_docs:sensor -->
+
+# Examples
+
+## Minimal example with numeric input
+
+```yaml
+# An extremely minimal configuration which only enables you to set the boiler's
+# water temperature setpoint as a number.
+
+opentherm:
+  in_pin: GPIOXX
+  out_pin: GPIOXX
+  ch_enable: true
+
+number:
+  - platform: opentherm
+    t_set:
+      name: "Boiler Control setpoint"
+```
+
+## Basic PID thermostat
+```yaml
+# A basic thremostat for a boiler with a single central heating circuit and
+# domestic hot water. It reports the flame, CH and DHW status, similar to what
+# you would expect to see on a thermostat and also reports the internal boiler
+# temperatures and the current modulation level. The temperature is regulated
+# through a PID Climate controller and the current room temperature is retrieved
+# from a sensor in Home Asisstant.
+
+# This configuration should meet most needs and is the recommended starting
+# point if you just want a thermostat with an external temperature sensor.
+
+opentherm:
+  in_pin: GPIOXX
+  out_pin: GPIOXX
+  dhw_enable: true    # Note that when we specify an input in hub config with a static value, it can't be
+                      # changed without uploading new firmware. If you want to be able to turn things on or off,
+                      # use a switch (see the ch_enable switch below).
+                      # Also note that when we define an input as a switch (or use other platform), we don't need
+                      # to set it at hub level.
+
+output:
+  - platform: opentherm
+    t_set:
+      id: t_set
+      min_value: 20
+      max_value: 65
+      zero_means_zero: true
+
+sensor:
+  - platform: opentherm
+    rel_mod_level:
+      name: "Boiler Relative modulation level"
+    t_boiler:
+      name: "Boiler water temperature"
+    t_ret:
+      name: "Boiler Return water temperature"
+
+  - platform: homeassistant
+    id: ch_room_temperature
+    entity_id: sensor.temperature
+    filters:
+      # Push room temperature every second to update PID parameters
+      - heartbeat: 1s
+
+binary_sensor:
+  - platform: opentherm
+    ch_active:
+      name: "Boiler Central Heating active"
+    dhw_active:
+      name: "Boiler Domestic Hot Water active"
+    flame_on:
+      name: "Boiler Flame on"
+    fault_indication:
+      name: "Boiler Fault indication"
+      entity_category: diagnostic
+    diagnostic_indication:
+      name: "Boiler Diagnostic event"
+      entity_category: diagnostic
+
+switch:
+  - platform: opentherm
+    ch_enable:
+      name: "Boiler Central Heating enabled"
+      mode: restore_default_on
+
+climate:
+  - platform: pid
+    name: "Central heating"
+    heat_output: t_set
+    default_target_temperature: 20
+    sensor: ch_room_temperature
+    control_parameters:
+      kp: 0.4
+      ki: 0.004
+```
+
+# References
+
+This component was forked from Arthur Rump's ``esphome-opentherm`` component, which now seems to be abandoned. I
+replaced the underlying OpenTherm library with code form Jiří Praus. I also did a lot of refactoring to bring the code
+closer to ESPHome coding standard.
+
+- [Original Arthur Rump's repository](https://github.com/arthurrump/esphome-opentherm)
+- [arduino-opentherm project by Jiří Praus](https://github.com/jpraus/arduino-opentherm)
+
+There is also my blog post with more background details and reasoning for automating an OpenTherm boiler with ESPHome:
+
+- [OpenTherm thermostat with ESPHome and Home Assistant](https://olegtarasov.me/opentherm-thermostat-esphome/)

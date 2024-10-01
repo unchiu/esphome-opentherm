@@ -418,6 +418,26 @@ SENSORS: dict[str, SensorSchema] = {
         keep_updated=False,
         message_data="u8_lb",
     ),
+    "otc_hc_ratio_ub": SensorSchema(
+        description="OTC heat curve ratio upper bound",
+        unit_of_measurement=UNIT_EMPTY,
+        accuracy_decimals=0,
+        state_class=STATE_CLASS_NONE,
+        disabled_by_default=True,
+        message="OTC_CURVE_BOUNDS",
+        keep_updated=False,
+        message_data="u8_hb",
+    ),
+    "otc_hc_ratio_lb": SensorSchema(
+        description="OTC heat curve ratio lower bound",
+        unit_of_measurement=UNIT_EMPTY,
+        accuracy_decimals=0,
+        state_class=STATE_CLASS_NONE,
+        disabled_by_default=True,
+        message="OTC_CURVE_BOUNDS",
+        keep_updated=False,
+        message_data="u8_lb",
+    ),
 }
 
 
@@ -585,6 +605,20 @@ SWITCHES: dict[str, SwitchSchema] = {
         message_data="flag8_hb_4",
         default_mode="restore_default_off",
     ),
+    "summer_mode_active": SwitchSchema(
+        description="Summer mode active",
+        message="STATUS",
+        keep_updated=True,
+        message_data="flag8_hb_5",
+        default_mode="restore_default_off",
+    ),
+    "dhw_block": SwitchSchema(
+        description="DHW blocked",
+        message="STATUS",
+        keep_updated=True,
+        message_data="flag8_hb_6",
+        default_mode="restore_default_off",
+    ),
 }
 
 
@@ -686,14 +720,22 @@ INPUTS: dict[str, InputSchema] = {
     "max_rel_mod_level": InputSchema(
         description="Maximum relative modulation level",
         unit_of_measurement=UNIT_PERCENT,
-        step=0.1,
+        step=1,
         icon="mdi:percent",
         message="MAX_MODULATION_LEVEL",
         keep_updated=True,
         message_data="f88",
+        range=(0, 100),
+    ),
+    "otc_hc_ratio": InputSchema(
+        description="OTC heat curve ratio",
+        unit_of_measurement=UNIT_CELSIUS,
+        step=0.1,
+        message="OTC_CURVE_RATIO",
+        keep_updated=True,
+        message_data="f88",
         range=(0, 127),
-        auto_min_value=AutoConfigure(
-            message="MaxCapacityMinModLevel", message_data="u8_lb"
-        ),
+        auto_min_value=AutoConfigure(message="OTC_CURVE_BOUNDS", message_data="u8_lb"),
+        auto_max_value=AutoConfigure(message="OTC_CURVE_BOUNDS", message_data="u8_hb"),
     ),
 }
