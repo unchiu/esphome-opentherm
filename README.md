@@ -11,8 +11,8 @@ ready-made adapters or roll your own:
 - [Ihor Melnyk's OpenTherm Adapter](http://ihormelnyk.com/opentherm_adapter)
 - [Jiří Praus' OpenTherm Gateway Arduino Shield](https://www.tindie.com/products/jiripraus/opentherm-gateway-arduino-shield/)
 
-‼️ As of now, this component acts only as an OpenTherm master (for example, a thermostat or controller) and not as a 
-slave or gateway. Your existing thermostat is not usable while you use ESPHome with this component to control your 
+‼️ As of now, this component acts only as an OpenTherm master (for example, a thermostat or controller) and not as a
+slave or gateway. Your existing thermostat is not usable while you use ESPHome with this component to control your
 boiler.
 
 There are plans to add support for a gateway mode, but I don't have any timeline to share at the moment.
@@ -35,15 +35,15 @@ this repo as an external component after it is merged into ESPHome.
 
 ## Usage
 
-Until this component is merged into ESPHome core, you need to add this repository as external component to your config: 
+Until this component is merged into ESPHome core, you need to add this repository as external component to your config:
 
 ```yaml
 external_components:
   source: github://olegtarasov/esphome-opentherm@main
 ```
 
-This references the main branch, which is cool if you want to stay up to date, but may also break your configuration 
-if breaking changes happen here. A better idea would be to reference a specific version, see the tags for available 
+This references the main branch, which is cool if you want to stay up to date, but may also break your configuration
+if breaking changes happen here. A better idea would be to reference a specific version, see the tags for available
 versions. Instead of a specific version, you could also choose to follow a major version by specifying `@v1` etc.
 
 Then, you need to define the OpenTherm hub in your configuration. Note that most OpenTherm adapters label `in` and
@@ -88,9 +88,9 @@ logger:
 
 The most important function for a thermostat is to set the boiler temperature setpoint. This component has three ways
 to provide this input: using a Home Assistant sensor from which the setpoint can be read, using a
-[number](https://esphome.io/components/number/), or defining an output to which other components can write. 
-For most users, the last option is the most useful one, as it can be combined with the 
-[PID](https://esphome.io/components/climate/pid.html) component to create a thermostat that works as you would expect 
+[number](https://esphome.io/components/number/), or defining an output to which other components can write.
+For most users, the last option is the most useful one, as it can be combined with the
+[PID](https://esphome.io/components/climate/pid.html) component to create a thermostat that works as you would expect
 a thermostat to work. See thermostat example further in this readme.
 
 ### Numerical input
@@ -98,7 +98,7 @@ a thermostat to work. See thermostat example further in this readme.
 There are three ways to set an input value:
 
 - As an input sensor, defined in the hub configuration:
-  
+
   ```yaml
   opentherm:
     t_set: setpoint_sensor
@@ -112,7 +112,7 @@ There are three ways to set an input value:
   This can be useful if you have an external thermostat-like device that provides the setpoint as a sensor.
 
 - As a number:
-  
+
   ```yaml
   number:
     - platform: opentherm
@@ -123,14 +123,14 @@ There are three ways to set an input value:
   This is useful if you want full control over your boiler and want to manually set all values.
 
 - As an output:
-  
+
   ```yaml
   output:
     - platform: opentherm
       t_set:
         id: setpoint
   ```
-  
+
   This is especially useful in combination with the PID Climate component:
 
   ```yaml
@@ -140,58 +140,58 @@ There are three ways to set an input value:
       # ...
   ```
 
-For the output and number variants, there are four more properties you can configure beyond those included in the 
+For the output and number variants, there are four more properties you can configure beyond those included in the
 output and number components by default:
 
-- `min_value` (float): The minimum value. For a number this is the minimum value you are allowed to input. 
+- `min_value` (float): The minimum value. For a number this is the minimum value you are allowed to input.
 For an output this is the number that will be sent to the boiler when the output is at 0%.
-- `max_value` (float): The maximum value. For a number this is the maximum value you are allowed to input. 
+- `max_value` (float): The maximum value. For a number this is the maximum value you are allowed to input.
 For an output this is the number that will be sent to the boiler when the output is at 100%.
-- `auto_max_value` (boolean): Automatically configure the maximum value to a value reported by the boiler. 
+- `auto_max_value` (boolean): Automatically configure the maximum value to a value reported by the boiler.
 Not available for all inputs.
-- `auto_min_value` (boolean): Automatically configure the minimum value to a value reported by the boiler. 
+- `auto_min_value` (boolean): Automatically configure the minimum value to a value reported by the boiler.
 Not available for all inputs.
 
 The following inputs are available:
 
 <!-- BEGIN schema_docs:input -->
-- `t_set`: Control setpoint: temperature setpoint for the boiler's supply water (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 100  
-  Supports `auto_max_value`
-- `t_set_ch2`: Control setpoint 2: temperature setpoint for the boiler's supply water on the second heating circuit (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 100  
-  Supports `auto_max_value`
-- `cooling_control`: Cooling control signal (%)  
-  Default `min_value`: 0  
+- `t_set`: Control setpoint: temperature setpoint for the boiler's supply water (°C)
+  Default `min_value`: 0
   Default `max_value`: 100
-- `t_dhw_set`: Domestic hot water temperature setpoint (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 127  
-  Supports `auto_min_value`  
   Supports `auto_max_value`
-- `max_t_set`: Maximum allowable CH water setpoint (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 127  
-  Supports `auto_min_value`  
-  Supports `auto_max_value`
-- `t_room_set`: Current room temperature setpoint (informational) (°C)  
-  Default `min_value`: -40  
-  Default `max_value`: 127
-- `t_room_set_ch2`: Current room temperature setpoint on CH2 (informational) (°C)  
-  Default `min_value`: -40  
-  Default `max_value`: 127
-- `t_room`: Current sensed room temperature (informational) (°C)  
-  Default `min_value`: -40  
-  Default `max_value`: 127
-- `max_rel_mod_level`: Maximum relative modulation level (%)  
-  Default `min_value`: 0  
+- `t_set_ch2`: Control setpoint 2: temperature setpoint for the boiler's supply water on the second heating circuit (°C)
+  Default `min_value`: 0
   Default `max_value`: 100
-- `otc_hc_ratio`: OTC heat curve ratio (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 127  
-  Supports `auto_min_value`  
+  Supports `auto_max_value`
+- `cooling_control`: Cooling control signal (%)
+  Default `min_value`: 0
+  Default `max_value`: 100
+- `t_dhw_set`: Domestic hot water temperature setpoint (°C)
+  Default `min_value`: 0
+  Default `max_value`: 127
+  Supports `auto_min_value`
+  Supports `auto_max_value`
+- `max_t_set`: Maximum allowable CH water setpoint (°C)
+  Default `min_value`: 0
+  Default `max_value`: 127
+  Supports `auto_min_value`
+  Supports `auto_max_value`
+- `t_room_set`: Current room temperature setpoint (informational) (°C)
+  Default `min_value`: -40
+  Default `max_value`: 127
+- `t_room_set_ch2`: Current room temperature setpoint on CH2 (informational) (°C)
+  Default `min_value`: -40
+  Default `max_value`: 127
+- `t_room`: Current sensed room temperature (informational) (°C)
+  Default `min_value`: -40
+  Default `max_value`: 127
+- `max_rel_mod_level`: Maximum relative modulation level (%)
+  Default `min_value`: 0
+  Default `max_value`: 100
+- `otc_hc_ratio`: OTC heat curve ratio (°C)
+  Default `min_value`: 0
+  Default `max_value`: 127
+  Supports `auto_min_value`
   Supports `auto_max_value`
 <!-- END schema_docs:input -->
 
@@ -389,7 +389,7 @@ switch:
   - platform: opentherm
     ch_enable:
       name: "Boiler Central Heating enabled"
-      mode: restore_default_on
+      restore_mode: RESTORE_DEFAULT_ON
 
 climate:
   - platform: pid
