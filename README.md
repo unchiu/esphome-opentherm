@@ -248,16 +248,25 @@ boiler.
 - `cooling_active`: Status: Cooling active
 - `ch2_active`: Status: Central Heating 2 active
 - `diagnostic_indication`: Status: Diagnostic event
+- `electricity_production`: Status: Electricity production
 - `dhw_present`: Configuration: DHW present
 - `control_type_on_off`: Configuration: Control type is on/off
 - `cooling_supported`: Configuration: Cooling supported
 - `dhw_storage_tank`: Configuration: DHW storage tank
 - `controller_pump_control_allowed`: Configuration: Controller pump control allowed
 - `ch2_present`: Configuration: CH2 present
+- `water_filling`: Configuration: Remote water filling
+- `heat_mode`: Configuration: Heating or cooling
 - `dhw_setpoint_transfer_enabled`: Remote boiler parameters: DHW setpoint transfer enabled
 - `max_ch_setpoint_transfer_enabled`: Remote boiler parameters: CH maximum setpoint transfer enabled
 - `dhw_setpoint_rw`: Remote boiler parameters: DHW setpoint read/write
 - `max_ch_setpoint_rw`: Remote boiler parameters: CH maximum setpoint read/write
+- `service_request`: Service required
+- `lockout_reset`: Lockout Reset
+- `low_water_pressure`: Low water pressure fault
+- `flame_fault`: Flame fault
+- `air_pressure_fault`: Air pressure fault
+- `water_over_temp`: Water overtemperature
 <!-- END schema_docs:binary_sensor -->
 
 ### Sensor
@@ -280,6 +289,7 @@ available:
 - `t_dhw2`: Domestic hot water temperature 2 (°C)
 - `t_exhaust`: Boiler exhaust temperature (°C)
 - `fan_speed`: Boiler fan speed (RPM)
+- `fan_speed_setpoint`: Boiler fan speed setpoint (RPM)
 - `flame_current`: Boiler flame current (µA)
 - `burner_starts`: Number of starts burner
 - `ch_pump_starts`: Number of starts CH pump
