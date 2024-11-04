@@ -317,6 +317,30 @@ available:
 - `otc_hc_ratio_lb`: OTC heat curve ratio lower bound ()
 <!-- END schema_docs:sensor -->
 
+#### Fan speed sensor
+
+An issue wa raised about `fan_speed` sensor giving wonky values: https://github.com/olegtarasov/esphome-opentherm/issues/12.
+It turned out that originally this library was using unsigned 16-bit integer to interpret fan speed, and it didn't work
+for some boilers. OpenTherm specification suggests that 8-bit integer should be used, with another 8 bits being a
+separate sensor, `fan_speed_setpoint`. Tests have also shown that for those boilers value interpreted as 8-bit integer
+should be further multiplied by 60 to obtain final RPM value.
+
+I decided to modify `fan_speed` sensor to work as 8-bit integer, performing the multiplication automatically, because
+it's closer to OpenTherm specification.
+
+Obviously, this breaks `fan_speed` sensor for boilers that encode values as 16-bit integers. In order to fix this, we
+added `data_type` property which allows to override sensor data type.
+
+So if you configured a `fan_speed` sensor, but suspect that it gives the wrong values, try to reconfigure it as follows:
+
+```yaml
+sensor:
+  - platform: opentherm
+    fan_speed:
+      name: "Boiler fan speed"
+      data_type: "u16" # overrides the default u8_lb_60 message
+```
+
 # Examples
 
 ## Minimal example with numeric input
