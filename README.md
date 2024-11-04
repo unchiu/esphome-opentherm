@@ -319,7 +319,7 @@ available:
 
 #### Fan speed sensor
 
-An issue wa raised about `fan_speed` sensor giving wonky values: https://github.com/olegtarasov/esphome-opentherm/issues/12.
+An issue was raised about `fan_speed` sensor giving wonky values: https://github.com/olegtarasov/esphome-opentherm/issues/12.
 It turned out that originally this library was using unsigned 16-bit integer to interpret fan speed, and it didn't work
 for some boilers. OpenTherm specification suggests that 8-bit integer should be used, with another 8 bits being a
 separate sensor, `fan_speed_setpoint`. Tests have also shown that for those boilers value interpreted as 8-bit integer
