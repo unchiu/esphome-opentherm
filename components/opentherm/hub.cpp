@@ -31,6 +31,10 @@ namespace message_data {
     uint8_t parse_u8_hb(const unsigned long response) { return (uint8_t) ((response >> 8) & 0xff); }
     int8_t parse_s8_lb(const unsigned long response) { return (int8_t) (response & 0xff); }
     int8_t parse_s8_hb(const unsigned long response) { return (int8_t) ((response >> 8) & 0xff); }
+
+    uint16_t parse_u8_lb(const unsigned long response) { return (uint16_t) (response & 0x00ff) * 60; }
+    uint16_t parse_u8_hb(const unsigned long response) { return (uint16_t) ((response >> 8) & 0x00ff * 60); }
+
     uint16_t parse_u16(const unsigned long response) { return (uint16_t) (response & 0xffff); }
     int16_t parse_s16(const unsigned long response) { return (int16_t) (response & 0xffff); }
     float parse_f88(const unsigned long response) {
@@ -268,7 +272,7 @@ void OpenthermHub::loop() {
             this->current_message_iterator = this->repeating_messages.begin();
         }
 
-        unsigned int request = this->build_request(*this->current_message_iterator);
+        unsigned long request = this->build_request(*this->current_message_iterator);
         if (this->sync_mode)
         {
             ESP_LOGD(TAG, "Sending SYNC OpenTherm request with id %d: %s", ot->getDataID(request), String(request, HEX).c_str());
