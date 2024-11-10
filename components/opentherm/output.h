@@ -1,6 +1,7 @@
 #pragma once
 
 #include "esphome/components/output/float_output.h"
+#include "esphome/core/helpers.h"  // for clamp() and lerp()
 #include "input.h"
 
 namespace esphome {
@@ -19,7 +20,8 @@ public:
     void set_id(const char* id) { this->id = id; }
 
     void write_state(float state) override {
-        this->state = state < 0.003 && this->zero_means_zero_ ? 0.0 : clamp(state * (max_value - min_value) + min_value, min_value, max_value);
+        this->state = state < 0.003 && this->zero_means_zero_ ? 0.0
+                    : clamp(lerp(state, min_value_, max_value_), min_value_, max_value_);
         this->has_state_ = true;
         ESP_LOGD("opentherm.output", "Output set to %.2f", this->state);
     };
