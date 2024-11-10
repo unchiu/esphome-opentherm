@@ -363,7 +363,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "keep_updated": True,
         "message_data": "s16",
     }),
-    "boiler_fan_speed": SensorSchema({
+    "fan_speed": SensorSchema({
         "description": "Boiler fan speed",
         "unit_of_measurement": UNIT_EMPTY,
         "accuracy_decimals": 0,
@@ -412,7 +412,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "keep_updated": False,
         "message_data": "u8_lb",
     }),
-    "opentherm_version_slave": SensorSchema({
+    "opentherm_version_device": SensorSchema({
         "description": "Version of OpenTherm implemented by slave",
         "unit_of_measurement": UNIT_EMPTY,
         "accuracy_decimals": 0,
@@ -422,7 +422,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "keep_updated": False,
         "message_data": "f88",
     }),
-    "slave_type": SensorSchema({
+    "device_type": SensorSchema({
         "description": "Slave product type",
         "unit_of_measurement": UNIT_EMPTY,
         "accuracy_decimals": 0,
@@ -432,7 +432,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "keep_updated": False,
         "message_data": "u8_hb",
     }),
-    "slave_version": SensorSchema({
+    "device_version": SensorSchema({
         "description": "Slave product version",
         "unit_of_measurement": UNIT_EMPTY,
         "accuracy_decimals": 0,
@@ -443,7 +443,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "message_data": "u8_lb",
     }),
 
-    "slave_id": SensorSchema({
+    "device_id": SensorSchema({
         "description": "Slave ID code",
         "unit_of_measurement": UNIT_EMPTY,
         "accuracy_decimals": 0,
@@ -537,7 +537,7 @@ BINARY_SENSORS: Schema = Schema({
         "keep_updated": False,
         "message_data": "flag8_hb_3",
     }),
-    "master_pump_control_allowed": BinarySensorSchema({
+    "controller_pump_control_allowed": BinarySensorSchema({
         "description": "Configuration: Master pump control allowed",
         "message": "SConfigSMemberIDcode",
         "keep_updated": False,

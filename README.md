@@ -219,7 +219,7 @@ The component can report boiler status on several binary sensors. The *Status* s
 - `control_type_on_off`: Configuration: Control type is on/off
 - `cooling_supported`: Configuration: Cooling supported
 - `dhw_storage_tank`: Configuration: DHW storage tank
-- `master_pump_control_allowed`: Configuration: Master pump control allowed
+- `controller_pump_control_allowed`: Configuration: Master pump control allowed
 - `ch2_present`: Configuration: CH2 present
 - `dhw_setpoint_transfer_enabled`: Remote boiler parameters: DHW setpoint transfer enabled
 - `max_ch_setpoint_transfer_enabled`: Remote boiler parameters: CH maximum setpoint transfer enabled
@@ -269,15 +269,15 @@ The boiler can also report several numerical values, which are available through
 - `otc_hc_ratio`: OTC heat curve ratio (°C)
 - `oem_fault_code`: OEM fault code ()
 - `t_heat_exchanger`: Boiler heat exchanger temperature (°C)
-- `boiler_fan_speed`: Boiler fan speed ()
+- `fan_speed`: Boiler fan speed ()
 - `boiler_flame_current`: Boiler flame current (uA) ()
 - `oem_diagnostic_code`: OEM diagnostic code ()
 - `max_capacity`: Maximum boiler capacity (KW) (kW)
 - `min_mod_level`: Minimum modulation level (%)
-- `opentherm_version_slave`: Version of OpenTherm implemented by slave ()
-- `slave_type`: Slave product type ()
-- `slave_version`: Slave product version ()
-- `slave_id`: Slave ID code ()
+- `opentherm_version_device`: Version of OpenTherm implemented by slave ()
+- `device_type`: Slave product type ()
+- `device_version`: Slave product version ()
+- `device_id`: Slave ID code ()
 <!-- END schema_docs:sensor -->
 
 ## Troubleshooting
