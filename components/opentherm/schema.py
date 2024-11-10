@@ -371,7 +371,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "BoilerFanSpeedSetpointAndActual",
         "keep_updated": True,
-        "message_data": "u16",
+        "message_data": "u8_lb_60",
     }),
     "boiler_flame_current": SensorSchema({
         "description": "Boiler flame current (uA)",
