@@ -32,8 +32,8 @@ namespace message_data {
     int8_t parse_s8_lb(const unsigned long response) { return (int8_t) (response & 0xff); }
     int8_t parse_s8_hb(const unsigned long response) { return (int8_t) ((response >> 8) & 0xff); }
 
-    uint16_t parse_u8_lb(const unsigned long response) { return (uint16_t) (response & 0x00ff) * 60; }
-    uint16_t parse_u8_hb(const unsigned long response) { return (uint16_t) ((response >> 8) & 0x00ff * 60); }
+    uint16_t parse_u8_lb_60(const unsigned long response) { return ((uint16_t) parse_u8_lb) * 60; }
+    uint16_t parse_u8_hb_60(const unsigned long response) { return ((uint16_t) parse_u8_hb) & 0x00ff * 60); }
 
     uint16_t parse_u16(const unsigned long response) { return (uint16_t) (response & 0xffff); }
     int16_t parse_s16(const unsigned long response) { return (int16_t) (response & 0xffff); }
