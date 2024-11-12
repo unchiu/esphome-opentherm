@@ -20,9 +20,11 @@ There are plans to add support for a gateway mode, but I don't have any timeline
 ## OpenTherm in ESPHome core
 
 Several pull requests to include this component into ESPHome core were initiated:
-   * https://github.com/esphome/esphome/pull/6645 — done
-   * https://github.com/esphome/esphome/pull/7529 — done
-   * https://github.com/esphome/esphome/pull/7676 — under review (hopefully, the last part!)
+  * https://github.com/esphome/esphome/pull/6645 — **done**
+  * https://github.com/esphome/esphome/pull/7529 — **done**
+  * https://github.com/esphome/esphome/pull/7676 — **done**
+
+Now we just need to wait until OpenTherm component hits ESPHome release.
 
 The code in those pull requests and this repo's `main` branch are kept in sync. There will be no need to reference
 this repo as an external component after it is merged into ESPHome.
