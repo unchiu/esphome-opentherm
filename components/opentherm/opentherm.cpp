@@ -545,29 +545,58 @@ const char *OpenTherm::message_id_to_str(MessageId id) {
   }
 }
 
-string OpenTherm::debug_data(OpenthermData &data) {
-  stringstream result;
-  result << bitset<8>(data.type) << " " << bitset<8>(data.id) << " " << bitset<8>(data.valueHB) << " "
-         << bitset<8>(data.valueLB) << "\n";
-  result << "type: " << this->message_type_to_str((MessageType) data.type) << "; ";
-  result << "id: " << to_string(data.id) << "; ";
-  result << "HB: " << to_string(data.valueHB) << "; ";
-  result << "LB: " << to_string(data.valueLB) << "; ";
-  result << "uint_16: " << to_string(data.u16()) << "; ";
-  result << "float: " << to_string(data.f88());
+static std::string num_to_bin(uint8_t n, int b)
+{
+  std::string s ;
+  for (int i = 0; i < b; i++)
+    {
+      s += (n & 1) +'0';
+      n >>= 1;
+    }
+  return s;
+}
 
-  return result.str();
+std::string OpenTherm::debug_data(OpenthermData &data) {
+
+  std::string result = num_to_bin(data.type, 8);
+  result += " ";
+  result += num_to_bin(data.id, 8);
+  result += " ";
+  result += num_to_bin(data.valueHB, 8);
+  result += " ";
+  result += num_to_bin(data.valueLB, 8);
+
+  result += "\ntype: ";
+  result += this->message_type_to_str((MessageType) data.type);
+  result += "; id: ";
+  result += to_string(data.id);
+  result += "; HB: ";
+  result += to_string(data.valueHB);
+  result += "; LB: ";
+  result += to_string(data.valueLB);
+  result += "; uint_16: ";
+  result += to_string(data.u16());
+  result += "; float: ";
+  result += to_string(data.f88());
+  result += '\0';
+
+  return result;
+
 }
 std::string OpenTherm::debug_error(OpenThermError &error) {
-  stringstream result;
-  result << "type: " << this->protocol_error_to_to_str(error.error_type) << "; ";
-  result << "data: ";
-  result << format_hex(error.data);
-  result << "; clock: " << to_string(clock_);
-  result << "; capture: " << bitset<32>(error.capture);
-  result << "; bit_pos: " << to_string(error.bit_pos);
 
-  return result.str();
+  std::string result = "type ";
+  result += this->protocol_error_to_to_str(error.error_type);
+  result += " data: ";
+  result += format_hex(error.data);
+  result += "; clock: ";
+  result += to_string(clock_);
+  result += "; capture: ";
+  result += num_to_bin(error.capture, 32);
+  result += "; bit_pos: ";
+  result += to_string(error.bit_pos);
+
+  return result.c_str();
 }
 
 float OpenthermData::f88() { return ((float) this->s16()) / 256.0; }
