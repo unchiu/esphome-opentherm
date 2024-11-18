@@ -15,15 +15,11 @@
 #include "Arduino.h"
 #endif
 #include <string>
-#include <sstream>
-#include <bitset>
 
 namespace esphome {
 namespace opentherm {
 
 using std::string;
-using std::bitset;
-using std::stringstream;
 using std::to_string;
 
 static const char *const TAG = "opentherm";
@@ -545,58 +541,29 @@ const char *OpenTherm::message_id_to_str(MessageId id) {
   }
 }
 
-static std::string num_to_bin(uint32_t n, int b) {
-  std::string s;
-  if (b > 32)
-    b = 32;
-  s.resize(b);
-  for (int i = 0; i < b; i++) {
-    s += (n & 1) + '0';
-    n >>= 1;
+std::string OpenTherm::format_bin(const uint8_t *data, size_t length) {
+  std::string result;
+  result.resize(length * 8);
+  for (int byte_idx = 0; byte_idx < length; ++byte_idx) {
+    for (int bit_idx = 0; bit_idx < 8; ++bit_idx) {
+      result[byte_idx * 8 + bit_idx] = (char) ((data[byte_idx] >> bit_idx) & 1 + '0');
+    }
   }
-  return s;
-}
-
-std::string OpenTherm::debug_data(OpenthermData &data) {
-
-  std::string result = num_to_bin((uint32_t)data.type, 8);
-  result += " ";
-  result += num_to_bin((uint32_t)data.id, 8);
-  result += " ";
-  result += num_to_bin((uint32_t)data.valueHB, 8);
-  result += " ";
-  result += num_to_bin((uint32_t)data.valueLB, 8);
-
-  result += "\ntype: ";
-  result += this->message_type_to_str((MessageType)data.type);
-  result += "; id: ";
-  result += to_string(data.id);
-  result += "; HB: ";
-  result += to_string(data.valueHB);
-  result += "; LB: ";
-  result += to_string(data.valueLB);
-  result += "; uint_16: ";
-  result += to_string(data.u16());
-  result += "; float: ";
-  result += to_string(data.f88());
-  result += '\0';
 
   return result;
 }
-std::string OpenTherm::debug_error(OpenThermError &error) {
 
-  std::string result = "type ";
-  result += this->protocol_error_to_to_str(error.error_type);
-  result += " data: ";
-  result += format_hex(error.data);
-  result += "; clock: ";
-  result += to_string(clock_);
-  result += "; capture: ";
-  result += num_to_bin(error.capture, 32);
-  result += "; bit_pos: ";
-  result += to_string(error.bit_pos);
-
-  return result.c_str();
+void OpenTherm::debug_data(OpenthermData &data) {
+  ESP_LOGD(TAG, "%s %s %s %s", format_bin(data.type).c_str(), format_bin(data.id).c_str(),
+           format_bin(data.valueHB).c_str(), format_bin(data.valueLB).c_str());
+  ESP_LOGD(TAG, "type: %s; id: %s; HB: %s; LB: %s; uint_16: %s; float: %s",
+           this->message_type_to_str((MessageType) data.type), to_string(data.id).c_str(),
+           to_string(data.valueHB).c_str(), to_string(data.valueLB).c_str(), to_string(data.u16()).c_str(),
+           to_string(data.f88()).c_str());
+}
+void OpenTherm::debug_error(OpenThermError &error) const {
+  ESP_LOGD(TAG, "data: %s; clock: %s; capture: %s; bit_pos: %s", format_hex(error.data).c_str(),
+           to_string(clock_).c_str(), format_bin(error.capture).c_str(), to_string(error.bit_pos).c_str());
 }
 
 float OpenthermData::f88() { return ((float) this->s16()) / 256.0; }
