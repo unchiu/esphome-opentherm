@@ -545,8 +545,10 @@ const char *OpenTherm::message_id_to_str(MessageId id) {
   }
 }
 
-static std::string num_to_bin(uint8_t n, int b) {
+static std::string num_to_bin(uint32_t n, int b) {
   std::string s;
+  if (b > 32)
+    b = 32;
   for (int i = 0; i < b; i++) {
     s += (n & 1) + '0';
     n >>= 1;
@@ -556,13 +558,13 @@ static std::string num_to_bin(uint8_t n, int b) {
 
 std::string OpenTherm::debug_data(OpenthermData &data) {
 
-  std::string result = num_to_bin(data.type, 8);
+  std::string result = num_to_bin((uint32_t)data.type, 8);
   result += " ";
-  result += num_to_bin(data.id, 8);
+  result += num_to_bin((uint32_t)data.id, 8);
   result += " ";
-  result += num_to_bin(data.valueHB, 8);
+  result += num_to_bin((uint32_t)data.valueHB, 8);
   result += " ";
-  result += num_to_bin(data.valueLB, 8);
+  result += num_to_bin((uint32_t)data.valueLB, 8);
 
   result += "\ntype: ";
   result += this->message_type_to_str((MessageType)data.type);
