@@ -549,7 +549,7 @@ static std::string num_to_bin(uint32_t n, int b) {
   std::string s;
   if (b > 32)
     b = 32;
-  s.resize(d);
+  s.resize(b);
   for (int i = 0; i < b; i++) {
     s += (n & 1) + '0';
     n >>= 1;
