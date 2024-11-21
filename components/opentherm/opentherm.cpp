@@ -541,13 +541,11 @@ const char *OpenTherm::message_id_to_str(MessageId id) {
   }
 }
 
-std::string OpenTherm::format_bin(const uint8_t *data, size_t length) {
+std::string OpenTherm::format_bin(const uint32_t data, size_t length) const {
   std::string result;
   result.resize(length * 8);
-  for (int byte_idx = 0; byte_idx < length; ++byte_idx) {
-    for (int bit_idx = 0; bit_idx < 8; ++bit_idx) {
-      result[byte_idx * 8 + bit_idx] = (char) ((data[byte_idx] >> bit_idx) & 1 + '0');
-    }
+  for (int idx = 0; idx < (length * 8); idx++) {
+    result[idx] = ((data >> idx) & 1) + '0';
   }
 
   return result;
