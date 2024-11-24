@@ -1,10 +1,12 @@
 from typing import Any
 
+import logging
+from esphome import automation
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import pins
 from esphome.components import sensor
-from esphome.const import CONF_ID, PLATFORM_ESP32, PLATFORM_ESP8266
+from esphome.const import CONF_ID, PLATFORM_ESP32, PLATFORM_ESP8266, CONF_TRIGGER_ID
 from . import const, schema, validate, generate
 
 CODEOWNERS = ["@olegtarasov"]
@@ -20,7 +22,26 @@ CONF_CH2_ACTIVE = "ch2_active"
 CONF_SUMMER_MODE_ACTIVE = "summer_mode_active"
 CONF_DHW_BLOCK = "dhw_block"
 CONF_SYNC_MODE = "sync_mode"
-CONF_OPENTHERM_VERSION = "opentherm_version"
+CONF_CONTROLLER_PRODUCT_TYPE = "controller_product_type"
+CONF_CONTROLLER_PRODUCT_VERSION = "controller_product_version"
+CONF_OPENTHERM_VERSION = "opentherm_version"  # Deprecated, will be removed
+CONF_OPENTHERM_VERSION_CONTROLLER = "opentherm_version_controller"
+CONF_CONTROLLER_ID = "controller_id"
+CONF_CONTROLLER_CONFIGURATION = "controller_configuration"
+CONF_BEFORE_SEND = "before_send"
+CONF_BEFORE_PROCESS_RESPONSE = "before_process_response"
+
+# Triggers
+BeforeSendTrigger = generate.opentherm_ns.class_(
+    "BeforeSendTrigger",
+    automation.Trigger.template(generate.OpenthermData.operator("ref")),
+)
+BeforeProcessResponseTrigger = generate.opentherm_ns.class_(
+    "BeforeProcessResponseTrigger",
+    automation.Trigger.template(generate.OpenthermData.operator("ref")),
+)
+
+_LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
@@ -36,7 +57,24 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_SUMMER_MODE_ACTIVE, False): cv.boolean,
             cv.Optional(CONF_DHW_BLOCK, False): cv.boolean,
             cv.Optional(CONF_SYNC_MODE, False): cv.boolean,
-            cv.Optional(CONF_OPENTHERM_VERSION): cv.positive_float,
+            cv.Optional(CONF_CONTROLLER_PRODUCT_TYPE): cv.int_range(min=0, max=255),
+            cv.Optional(CONF_CONTROLLER_PRODUCT_VERSION): cv.int_range(min=0, max=255),
+            cv.Optional(CONF_OPENTHERM_VERSION_CONTROLLER): cv.positive_float,
+            cv.Optional(CONF_CONTROLLER_ID): cv.int_range(min=0, max=255),
+            cv.Optional(CONF_CONTROLLER_CONFIGURATION): cv.int_range(min=0, max=255),
+            cv.Optional(CONF_OPENTHERM_VERSION): cv.positive_float,  # Deprecated
+            cv.Optional(CONF_BEFORE_SEND): automation.validate_automation(
+                {
+                    cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(BeforeSendTrigger),
+                }
+            ),
+            cv.Optional(CONF_BEFORE_PROCESS_RESPONSE): automation.validate_automation(
+                {
+                    cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(
+                        BeforeProcessResponseTrigger
+                    ),
+                }
+            ),
         }
     )
     .extend(
@@ -60,7 +98,13 @@ async def to_code(config: dict[str, Any]) -> None:
     out_pin = await cg.gpio_pin_expression(config[CONF_OUT_PIN])
     cg.add(var.set_out_pin(out_pin))
 
-    non_sensors = {CONF_ID, CONF_IN_PIN, CONF_OUT_PIN}
+    non_sensors = {
+        CONF_ID,
+        CONF_IN_PIN,
+        CONF_OUT_PIN,
+        CONF_BEFORE_SEND,
+        CONF_BEFORE_PROCESS_RESPONSE,
+    }
     input_sensors = []
     for key, value in config.items():
         if key in non_sensors:
@@ -72,6 +116,12 @@ async def to_code(config: dict[str, Any]) -> None:
             )
             input_sensors.append(key)
         else:
+            if key == CONF_OPENTHERM_VERSION:
+                _LOGGER.warning(
+                    f"{CONF_OPENTHERM_VERSION} is deprecated and will be removed in esphome 2025.2.0\n"
+                    f"Please remove this property and set {CONF_OPENTHERM_VERSION_CONTROLLER} in number: "
+                    f"section."
+                )
             cg.add(getattr(var, f"set_{key}")(value))
 
     if len(input_sensors) > 0:
@@ -81,3 +131,15 @@ async def to_code(config: dict[str, Any]) -> None:
         )
         generate.define_readers(const.INPUT_SENSOR, input_sensors)
         generate.add_messages(var, input_sensors, schema.INPUTS)
+
+    for conf in config.get(CONF_BEFORE_SEND, []):
+        trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
+        await automation.build_automation(
+            trigger, [(generate.OpenthermData.operator("ref"), "x")], conf
+        )
+
+    for conf in config.get(CONF_BEFORE_PROCESS_RESPONSE, []):
+        trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
+        await automation.build_automation(
+            trigger, [(generate.OpenthermData.operator("ref"), "x")], conf
+        )
