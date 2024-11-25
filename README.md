@@ -1,3 +1,11 @@
+# ❗ OpenTherm in ESPHome core
+
+Starting with ESPHome 2024.11 this component is included in core! 🎉 There is no need to reference this repository for
+normal usage scenarios. Use [official documentation](https://esphome.io/components/opentherm.html) to configure your
+OpenTherm bridge.
+
+If you want to test bleeding edge features and fixes, read the section on `develop` branch below.
+
 # OpenTherm Component for ESPHome
 
 OpenTherm (OT) is a standard communications protocol used in central heating systems for the communication between
@@ -17,20 +25,6 @@ boiler.
 
 There are plans to add support for a gateway mode, but I don't have any timeline to share at the moment.
 
-## OpenTherm in ESPHome core
-
-Several pull requests to include this component into ESPHome core were initiated:
-  * https://github.com/esphome/esphome/pull/6645 — **done**
-  * https://github.com/esphome/esphome/pull/7529 — **done**
-  * https://github.com/esphome/esphome/pull/7676 — **done**
-
-Now we just need to wait until OpenTherm component hits ESPHome release.
-
-The code in those pull requests and this repo's `main` branch are kept in sync. There will be no need to reference
-this repo as an external component after it is merged into ESPHome.
-
-`develop` branch in this repo will contain bleeding edge code that is not yet proposed to be merged into ESPHome.
-
 ## Quick glossary
 
 - CH: Central Heating
@@ -38,18 +32,28 @@ this repo as an external component after it is merged into ESPHome.
 
 ## Usage
 
-Until this component is merged into ESPHome core, you need to add this repository as external component to your config:
+As I've mentioned before, this component is now part of ESPHome core. Most users don't need this repository. Just follow
+the [official documentation](https://esphome.io/components/opentherm.html) to setup your bridge.
+
+### Testing unstable versions
+
+If you want to test unstable versions of the code, choose your branch first:
+
+* `main` — contains the code that was merged to ESPHome core. No need to reference this branch in your config really.
+* `develop` — bleeding edge changes that are not yet proposed to be merged. Individual commits may not even compile.
+  **Use commit hashes or known tags to reference individual commits from this branch!**
+* `pr_*` — Changes that correspond to open PRs to ESPHome core.
+
+After you've chosen your branch, or individual commit, add this repository as external component to your config:
 
 ```yaml
 external_components:
-  source: github://olegtarasov/esphome-opentherm@main
+  source: github://olegtarasov/esphome-opentherm[@<branch or tag>]
 ```
 
-This references the main branch, which is cool if you want to stay up to date, but may also break your configuration
-if breaking changes happen here. A better idea would be to reference a specific version, see the tags for available
-versions. Instead of a specific version, you could also choose to follow a major version by specifying `@v1` etc.
+## Declaring the OpenTherm hub
 
-Then, you need to define the OpenTherm hub in your configuration. Note that most OpenTherm adapters label `in` and
+You need to declare the OpenTherm hub in your configuration. Note that most OpenTherm adapters label `in` and
 `out` pins relative to themselves; this component labels its `in` and `out` pins relative to the microcontroller
 ESPHome runs on. As such, your bridge's `in` pin becomes the hub's `out` pin and vice versa.
 
