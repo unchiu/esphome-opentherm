@@ -223,7 +223,6 @@ void IRAM_ATTR OpenTherm::bit_read_(uint8_t value) {
 ProtocolErrorType IRAM_ATTR OpenTherm::verify_stop_bit_(uint8_t value) {
   if (value) {  // stop bit detected
     return check_parity_(this->data_) ? ProtocolErrorType::NO_ERROR : ProtocolErrorType::PARITY_ERROR;
-//    return __builtin_parity(this->data_) ? ProtocolErrorType::PARITY_ERROR : ProtocolErrorType::NO_ERROR;
   } else {  // no stop bit detected, error
     return ProtocolErrorType::INVALID_STOP_BIT;
   }
