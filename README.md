@@ -4,7 +4,7 @@ Starting with ESPHome 2024.11 this component is included in core! 🎉 There is 
 normal usage scenarios. Use [official documentation](https://esphome.io/components/opentherm.html) to configure your
 OpenTherm bridge.
 
-If you want to test bleeding edge features and fixes, read the section on `develop` branch below.
+If you want to test bleeding edge features and fixes, read the Usage section below.
 
 # OpenTherm Component for ESPHome
 
