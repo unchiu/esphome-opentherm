@@ -370,17 +370,9 @@ class OpenTherm {
 
 #ifdef ESP8266
   // ESP8266 timer can accept callback with no parameters, so we have this hack to save a static instance of OpenTherm
-  static OpenTherm *instance;
+  static OpenTherm *instance;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 #endif
 };
-
-/// Format the byte array \p data of length \p len in binary.
-std::string format_bin(const uint8_t *data, size_t length);
-/// Format an unsigned integer in binary, starting with the most significant byte.
-template<typename T, enable_if_t<std::is_unsigned<T>::value, int> = 0> std::string format_bin(T val) {
-  val = convert_big_endian(val);
-  return format_bin(reinterpret_cast<uint8_t *>(&val), sizeof(T));
-}
 
 }  // namespace opentherm
 }  // namespace esphome
