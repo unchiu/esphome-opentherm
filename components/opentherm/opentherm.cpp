@@ -578,17 +578,5 @@ void OpenthermData::s16(int16_t value) {
   this->valueHB = (value >> 8) & 0xFF;
 }
 
-std::string format_bin(const uint8_t *data, size_t length) {
-  std::string result;
-  result.resize(length * 8);
-  for (int byte_idx = 0; byte_idx < length; byte_idx++) {
-    for (int bit_idx = 0; bit_idx < 8; bit_idx++) {
-      result[byte_idx * 8 + bit_idx] = ((data[byte_idx] >> (7 - bit_idx)) & 1) + '0';
-    }
-  }
-
-  return result;
-}
-
 }  // namespace opentherm
 }  // namespace esphome
