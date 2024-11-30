@@ -49,6 +49,7 @@ After you've chosen your branch, or individual commit, add this repository as ex
 ```yaml
 external_components:
   source: github://olegtarasov/esphome-opentherm[@<branch or tag>]
+  refresh: 0s
 ```
 
 ## Declaring the OpenTherm hub
