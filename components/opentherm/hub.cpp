@@ -319,7 +319,7 @@ bool OpenthermHub::check_for_lite(void) {
   if (this->opentherm_->is_timeout()) {
     this->handle_timeout_error_();
     ESP_LOGE(TAG, "Possible OpenTherm-Lite detected");
-    ESP_LOGE(TAG, "Device failed to respond within %s seconds",
+    ESP_LOGE(TAG, "Device failed to respond within %i seconds",
              (now - this->last_conversation_start_) / 1000);
     return true;
     // Should a protocol error also flag OT/- ?
