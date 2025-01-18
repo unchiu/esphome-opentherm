@@ -131,7 +131,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "device_class": DEVICE_CLASS_TEMPERATURE,
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "Tret",
-        "keep_updated": True,
+        "keep_updated": False,
         "message_data": "f88",
     }),
     "t_storage": SensorSchema({
